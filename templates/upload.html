@@ -1,0 +1,85 @@
+{{% define "uploadPage" %}}
+<!DOCTYPE html>
+<html ng-app="app" lang="en">
+  <head>
+    <title>File upload</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.28/angular.min.js"></script>    
+  </head>
+  <body ng-controller="FileUploadCtrl">
+    <div class="container">
+      <h1>File upload</h1>
+      <div class="form-group">
+        <label for="fileTitle">Title</label>
+        <input ng-model="title" type="text" class="form-control" name="title" id="fileTitle" placeholder="Please, enter a title for the file">
+      </div>
+
+      <div class="form-group">
+        <label for="fileToUpload">Selecciona un archivo</label><br />
+        <input type="file" ng-model-instant id="fileToUpload" multiple onchange="angular.element(this).scope().setFiles(this)" />
+      </div>
+      
+      <input type="button" ng-click="uploadFile()" value="Upload" />
+    
+      <h2>Uploaded files</h2>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Upload Time</th>
+            <th>Download</th>
+          </tr>
+        </thead>
+        <tbody>        
+          <tr ng-repeat="fileUploaded in filesUploaded">
+            <td>{{fileUploaded.ID}}</td>
+            <td>{{fileUploaded.Title}}</td>
+            <td>{{fileUploaded.UploadTime}}</td>
+            <td><a href="/download/{{fileUploaded.ID}}">download</a></td>
+          </tr>        
+          <tr ng-if="filesUploaded.length == 0">
+            <td colspan="4">No files uploaded yet</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script>
+      var app = angular.module("app", []);
+      app.controller("FileUploadCtrl", function($scope,$http) {
+
+        $scope.setFiles = function(element) {
+        $scope.$apply(function() {            
+            $scope.files = []
+            for (var i = 0; i < element.files.length; i++) {
+              $scope.files.push(element.files[i])
+            }
+          $scope.progressVisible = false
+          });
+        };
+
+        $scope.uploadFile = function() {            
+            var fd = new FormData()
+            for (var i in $scope.files) {
+                fd.append("upload", $scope.files[i])
+            }
+            fd.append("title", $scope.title)
+
+            $http.post('/', fd, {
+                transformRequest: angular.identity,
+                headers: {'Content-Type': undefined}
+            })
+            .success(function(response){
+              $scope.filesUploaded = response;
+            })
+            .error(function(){
+              console.log('Error');
+            });
+        }
+    });
+    </script>
+  </body>
+</html>
+{{% end %}}
