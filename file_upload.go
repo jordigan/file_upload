@@ -2,7 +2,7 @@ package main
 
 import (
 	"crypto/rand"
-    "encoding/json"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
